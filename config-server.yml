@@ -1,0 +1,62 @@
+---
+- hosts: apache
+  become: true
+
+  tasks:
+    - name: Update packages
+      yum:
+        name: '*'
+        state: latest
+    - name: Install apache
+      yum:
+        name: httpd
+        state: latest
+    - name: Install git
+      yum:
+        name: git
+        state: latest
+    - name: Install epel-release
+      yum:
+        name: epel-release
+        state: latest
+    - name: Install package with multiple repos enabled
+      yum:
+        name: sos
+        enablerepo: "epel,ol7_latest"
+    - name: Install the nginx rpm from a remote repo
+      yum:
+        name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+        state: present
+    - name : Install utils
+      yum:
+        name: yum-utils
+        state: latest
+    - name: Enable php72 repos
+      command: yum-config-manager --enable remi-php72
+    - name : install php
+      yum:
+        name: '{{item}}'
+        state: present
+      with_items:
+        - php72 
+        - php72-php-fpm
+        - php72-php-gd
+        - php72-php-json
+        - php72-php-mbstring
+        - php72-php-mysqlnd
+        - php72-php-xml
+        - php72-php-xmlrpc
+        - php72-php-opcache
+    - name: check php
+      command: php72 --version
+    - name : check dependencies
+      command: php72 --modules 
+    - name: firewall rules
+      firewalld:
+          port: 80/tcp
+          permanent: true
+          state: enabled
+    - name: Enable service httpd, and not touch the state
+      ansible.builtin.service:
+        name: httpd
+        enabled: yes
