@@ -1,2 +1,2 @@
 # wsite-configs
-Website configurations
+This is a config repository for servers.
